@@ -1,33 +1,32 @@
-
-import logging
-import sys
 import atexit
+import logging
 import signal
+import sys
+from contextlib import suppress
+from typing import Any
+
 import click
-from tornado.options import options
 from celery.bin.base import CeleryCommand
 from flower.app import Flower
-from flower.command import print_banner, apply_env_options, apply_options, setup_logging, extract_settings
+from flower.command import apply_env_options, extract_settings, print_banner
 from flower.urls import settings
-from pyramid.paster import bootstrap, setup_logging
+from pyramid.paster import bootstrap
 from pyramid_celery import setup_app
+from tornado.options import options
 
 logger = logging.getLogger(__name__)
 
-def sigterm_handler(signum, _):
-    logger.info('%s detected, shutting down', signum)
+
+def sigterm_handler(signum: Any, _: Any) -> None:
+    logger.info("%s detected, shutting down", signum)
     sys.exit(0)
 
 
-@click.command(cls=CeleryCommand,
-               context_settings={
-                   'ignore_unknown_options': True
-               })
+@click.command(cls=CeleryCommand, context_settings={"ignore_unknown_options": True})
 @click.argument("ini", default="development.ini")
 @click.pass_context
-def flower(ctx, ini, ini_var):
+def flower(ctx: click.Context, ini: str, ini_var: str) -> None:
     """Start flower monitor."""
-
     click.echo("Starting flower ...")
 
     apply_env_options()
@@ -38,11 +37,11 @@ def flower(ctx, ini, ini_var):
 
     capp = ctx.obj.app
     env = bootstrap(ini, options={})
-    registry = env['registry']
-    app = env['app']
-    root = env['root']
-    request = env['request']
-    closer = env['closer']
+    registry = env["registry"]
+    app = env["app"]
+    root = env["root"]
+    request = env["request"]
+    closer = env["closer"]
     setup_app(app, root, request, registry, closer, ini)
 
     flower_app = Flower(capp=capp, options=options, **settings)
@@ -51,10 +50,7 @@ def flower(ctx, ini, ini_var):
     signal.signal(signal.SIGTERM, sigterm_handler)
 
     if not ctx.obj.quiet:
-        print_banner(capp, 'ssl_options' in settings)
+        print_banner(capp, "ssl_options" in settings)
 
-
-    try:
+    with suppress(KeyboardInterrupt, SystemExit):
         flower_app.start()
-    except (KeyboardInterrupt, SystemExit):
-        pass
