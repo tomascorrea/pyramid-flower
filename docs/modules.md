@@ -1,1 +1,1 @@
-::: pyramid_flower.foo
+::: pyramid_flower.script
