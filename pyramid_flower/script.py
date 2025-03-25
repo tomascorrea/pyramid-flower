@@ -25,7 +25,7 @@ def sigterm_handler(signum: Any, _: Any) -> None:
 @click.command(cls=CeleryCommand, context_settings={"ignore_unknown_options": True})
 @click.argument("ini", default="development.ini")
 @click.pass_context
-def flower(ctx: click.Context, ini: str, ini_var: str) -> None:
+def pflower(ctx: click.Context, ini: str, ini_var: str) -> None:
     """Start flower monitor."""
     click.echo("Starting flower ...")
 

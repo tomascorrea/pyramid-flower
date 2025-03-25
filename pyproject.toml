@@ -38,7 +38,7 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.plugins."celery.commands"]
-pflower = "pyramid_flower.script:flower"
+pflower = "pyramid_flower.script:pflower"
 
 
 [tool.mypy]
